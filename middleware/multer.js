@@ -1,4 +1,9 @@
 const multer = require("multer");
+
+// Try using
+// destination: require.main?.path + "/" +" public/images/ "
+// (tested using “multer”: “^1.4.2” , in typescript project)
+
 //configure how the files are stored
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
