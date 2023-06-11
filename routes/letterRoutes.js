@@ -9,6 +9,6 @@ router.route('/')
     .patch(upload.single('file'), lettersController.updateLetter)
     .delete(lettersController.deleteLetter)
 
-router.route('/download/:id').get(lettersController.downloadLetter)
+router.route('/:id').get(lettersController.getOneLetter)
 
 module.exports = router

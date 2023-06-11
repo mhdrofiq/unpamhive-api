@@ -6,10 +6,7 @@ const signatureSchema = new mongoose.Schema({
         required: true,
         ref: 'User'
     },
-    file: {
-        type: String,
-        required: [true, "Please provide a signature image"],
-    },
+    file: Buffer
 });
 
 module.exports = mongoose.model("Signature", signatureSchema);

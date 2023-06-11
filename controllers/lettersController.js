@@ -1,6 +1,7 @@
 const User = require('../models/User')
 const Letter = require('../models/Letter')
 const path = require("path");
+const fs = require("fs");
 
 // @desc Get all letters
 // @route GET /letters
@@ -28,14 +29,30 @@ const getAllLetters = async (req, res) => {
 const createNewLetter = async (req, res) => {
     const { user, recipient, title, letterNumber, letterType, category, end, start, description, letterStatus, rejectMessage} = req.body
 
-    //get the file 
-    const file = req.file.path
+    //get the file path
+    const filepath = req.file.path
 
     if(!user || !recipient || !title || !letterType) {
         return res.status(400).json({message: 'All fields are required <' + user + '> <' + recipient + '> <' + title + '> <' + letterType + '> <' + category + '>'})
+    }   
+
+    const letterData = {
+        user: user, 
+        recipient: recipient, 
+        title: title,
+        letterNumber: letterNumber, 
+        letterType: letterType, 
+        letterStatus: letterStatus, 
+        category: category, 
+        description: description, 
+        rejectMessage: rejectMessage, 
+        file: fs.readFileSync(filepath), 
+        // filename: filepath,
+        end: end, 
+        start: start,
     }
 
-    const letter = await Letter.create({user, recipient, title, letterNumber, letterType, letterStatus, category, description, rejectMessage, file, end, start})
+    const letter = await Letter.create(letterData)
 
     //if created
     if(letter){
@@ -51,12 +68,12 @@ const createNewLetter = async (req, res) => {
 const updateLetter = async (req, res) => {
     const { id, user, recipient, title, letterNumber, letterType, category, end, start, description, letterStatus, rejectMessage } = req.body
 
-    const file = req.file.path
-
     //confirm data
     if(!id || !user || !recipient || !title || !letterType){
         return res.status(400).json({message: 'All fields are required'})
     }
+
+    console.log('at letter controller: ', req.file)
 
     //confirm letter exists to update
     const letter = await Letter.findById(id)
@@ -75,7 +92,9 @@ const updateLetter = async (req, res) => {
     letter.rejectMessage = rejectMessage
     letter.start = start
     letter.end = end
-    letter.file = file
+    if(req.file){
+        letter.file = fs.readFileSync(req.file.path)
+    }
 
     const updatedLetter = await letter.save()
 
@@ -106,18 +125,19 @@ const deleteLetter = async (req, res) => {
     res.json(reply)
 }
 
-const downloadLetter = async (req, res) => {
+const getOneLetter = async (req, res) => {
     const { id } = req.params
 
     const letter = await Letter.findById(id)
     if(!letter){
         // return next (new Error('Letter not found'))
-        return res.status(400).json({message: 'Letter not found, download failed'})
+        return res.status(400).json({message: 'Letter not found, get one letter failed'})
     }
-
+    //console.log(letter)
     const file = letter.file
-    const filePath = path.join(__dirname, `../${file}`)
-    res.download(filePath)
+
+    //NOTE: previously used res.json(file) but is wrong. Use res.send(file) instead
+    res.send(file)
 }
 
 module.exports = {
@@ -125,5 +145,5 @@ module.exports = {
     createNewLetter,
     updateLetter,
     deleteLetter,
-    downloadLetter
+    getOneLetter
 }

@@ -48,9 +48,7 @@ const letterSchema = new mongoose.Schema(
             type: String,
             default: 'NA'
         },
-        file: {
-            type: String,
-        },
+        file: Buffer
     },
     {
         timestamps: true
